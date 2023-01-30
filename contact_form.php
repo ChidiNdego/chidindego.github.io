@@ -1,5 +1,5 @@
 <?php
-if (isset($_POST['Email'])) {
+if (isset($_POST['email'])) {
 
     // EDIT THE FOLLOWING TWO LINES:
     $email_to = "chidindego@gmail.com";
@@ -23,9 +23,9 @@ if (isset($_POST['Email'])) {
         problem("We're sorry, but there appears to be a problem with the form you submitted.");
     }
 
-    $name = $_POST['Name']; // required
-    $email = $_POST['Email']; // required
-    $message = $_POST['Message']; // required
+    $name = $_POST['name']; // required
+    $email = $_POST['email']; // required
+    $message = $_POST['message']; // required
 
     $error_message = "";
     $email_exp = '/^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/';

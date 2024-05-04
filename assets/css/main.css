@@ -2597,6 +2597,7 @@ input, select, textarea {
 
 				#home .image {
 					margin: 0 auto 2em auto;
+					background-size: contain;
 				}
 
 	}

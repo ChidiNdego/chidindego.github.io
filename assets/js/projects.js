@@ -6,7 +6,7 @@ $(document).ready(function() {
             $backward = $('<span class="backward"></span>').appendTo($t),
             $reel = $t.find('.reel'),
             $items = $reel.find('article'),
-            margin = 40;  // Adjust this margin to increase the space after the last item
+            margin = 0;  // Adjust this margin to increase the space after the last item
 
         var pos = 0,
             leftLimit,

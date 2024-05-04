@@ -2321,13 +2321,15 @@ input, select, textarea {
 	}
 
 		.wrapper.style1 {
-			/* background-image: none; */
-			/* background-color: rgba(225, 225, 225, 1.0); */
 			position: relative;
-			background-image: url("../../images/skill-header.jpg");
+			/* background-image: url("../../images/skill-header.jpg"); */
+			/* background-position: center center; */
+			background: url("../../images/skill-header.jpg") no-repeat center center;
 			background-size: cover;
-			background-position: center center;
 			background-attachment: fixed;
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
 			color: #fff;
 			text-align: center;
 			padding: 7.5em 0 2em 0;

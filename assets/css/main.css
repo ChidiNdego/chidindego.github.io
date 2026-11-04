@@ -3428,4 +3428,307 @@ input, select, textarea {
 			margin: 0;
 		}
 
+		.hero-actions {
+			flex-direction: column;
+			align-items: stretch;
+			justify-content: center;
+		}
+
+			.hero-actions .button {
+				width: 100%;
+			}
+
+	}
+
+/* Motion, experience timeline, and the new portrait crop */
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	#home,
+	#experience,
+	#stack,
+	#contact,
+	#main {
+		scroll-margin-top: 4.2em;
+	}
+
+	.wrapper.style1 {
+		background: #c8c8c8;
+		background-image: none;
+		overflow: hidden;
+	}
+
+	.hero-bg {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -14%;
+		bottom: -14%;
+		background: url("../../images/skill-header.jpg") no-repeat center center;
+		background-size: cover;
+		z-index: 0;
+		pointer-events: none;
+		will-change: transform;
+	}
+
+	#home .container {
+		position: relative;
+		z-index: 1;
+	}
+
+	#home .image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center center;
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75em;
+		align-items: center;
+		margin-top: 0.25em;
+	}
+
+		.hero-actions .button {
+			width: auto;
+			max-width: 100%;
+		}
+
+	.button:focus-visible {
+		outline: 3px solid #0b4f6c;
+		outline-offset: 3px;
+	}
+
+	#loader {
+		position: fixed;
+		inset: 0;
+		z-index: 20000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #282828;
+		color: #fff;
+		font-size: 2.6em;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		transition: opacity 0.4s ease;
+	}
+
+		#loader.is-done {
+			opacity: 0;
+			pointer-events: none;
+		}
+
+	#experience {
+		text-align: left;
+	}
+
+		#experience > .container > header,
+		#experience .block-title {
+			text-align: center;
+		}
+
+		#experience .profile {
+			max-width: 46em;
+			margin: 0 auto 1.5em;
+			text-align: left;
+			color: #1c1c1c;
+		}
+
+		#experience .cv-download {
+			margin: 0.5em 0 0;
+		}
+
+	.skill-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45em;
+		justify-content: center;
+		list-style: none;
+		padding: 0;
+		margin: 0 auto 2.5em;
+		max-width: 58em;
+	}
+
+		.skill-list li {
+			list-style: none;
+			background: #fff;
+			color: #1c1c1c;
+			border: 1px solid #d0d0d0;
+			border-radius: 999px;
+			padding: 0.35em 0.8em;
+			font-size: 0.82em;
+			font-weight: 600;
+			line-height: 1.4;
+		}
+
+	.timeline {
+		position: relative;
+		max-width: 52em;
+		margin: 0 auto;
+		padding: 0;
+		list-style: none;
+	}
+
+		.timeline::before {
+			content: "";
+			position: absolute;
+			left: 0.45em;
+			top: 0.4em;
+			bottom: 0.4em;
+			width: 2px;
+			background: #bdbdbd;
+		}
+
+	.role-card {
+		position: relative;
+		margin: 0 0 1.25em 2em;
+		padding: 1.1em 1.25em 1.15em;
+		background: #fff;
+		border: 1px solid #e3e3e3;
+		border-radius: 8px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		text-align: left;
+	}
+
+		.role-card::before {
+			content: "";
+			position: absolute;
+			left: -1.78em;
+			top: 1.35em;
+			width: 0.7em;
+			height: 0.7em;
+			border-radius: 50%;
+			background: #1f7ea3;
+			box-shadow: 0 0 0 3px #f4f4f4;
+		}
+
+		.role-card h3 {
+			margin-bottom: 0.15em;
+			font-size: 1.25em;
+		}
+
+		.role-card .when,
+		.role-card .org {
+			margin: 0;
+			color: #1c1c1c;
+		}
+
+		.role-card .when {
+			font-weight: 600;
+		}
+
+		.role-card .org {
+			margin-bottom: 0.7em;
+		}
+
+		.role-card ul {
+			list-style: disc;
+			margin: 0;
+			padding-left: 1.15em;
+			text-align: left;
+		}
+
+		.role-card li {
+			margin: 0 0 0.4em;
+		}
+
+		.role-card li:last-child {
+			margin-bottom: 0;
+		}
+
+	.edu-list {
+		max-width: 52em;
+		margin: 0 auto;
+		padding: 0;
+		list-style: none;
+		text-align: left;
+	}
+
+		.edu-list li {
+			background: #fff;
+			border: 1px solid #e3e3e3;
+			border-radius: 8px;
+			padding: 0.85em 1.1em;
+			margin: 0 0 0.7em;
+			color: #1c1c1c;
+			font-weight: 600;
+		}
+
+	.js-motion .reveal {
+		opacity: 0;
+		transform: translateY(22px);
+		transition: opacity 0.65s ease, transform 0.65s ease;
+	}
+
+	.js-motion .reveal.is-in,
+	.js-motion .reveal:focus-within {
+		opacity: 1;
+		transform: none;
+	}
+
+	.js-motion .skill-list li {
+		opacity: 0;
+	}
+
+	.js-motion .skill-list.is-in li {
+		animation: chip-in 0.45s ease forwards;
+		animation-delay: calc(var(--i, 0) * 28ms);
+	}
+
+	@keyframes chip-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+
+		.js-motion .reveal,
+		.js-motion .skill-list li {
+			opacity: 1 !important;
+			transform: none !important;
+			animation: none !important;
+			transition: none !important;
+		}
+
+		#loader {
+			display: none !important;
+		}
+
+		.hero-bg {
+			transform: none !important;
+		}
+	}
+
+	@media screen and (max-width: 736px) {
+		#nav a {
+			padding: 0 0.4em;
+			font-size: 0.82em;
+		}
+
+		body {
+			padding-top: 3.15em;
+		}
+
+		.hero-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+			.hero-actions .button {
+				width: 100%;
+			}
 	}

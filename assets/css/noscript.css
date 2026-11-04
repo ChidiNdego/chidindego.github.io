@@ -4,6 +4,11 @@
 	so the page stays readable instead of waiting on a script.
 */
 
+/* The load counter is progressive enhancement. Without JS it must not cover the page. */
+#loader {
+	display: none !important;
+}
+
 body.is-preload *,
 body.is-preload *:before,
 body.is-preload *:after {

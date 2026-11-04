@@ -296,9 +296,10 @@ h2 {
 	margin: 0 0 1.2rem;
 	font-size: clamp(2.6rem, 6vw, 4.6rem);
 }
-.line-mask { display: block; overflow: hidden; }
-.line-mask-inner { display: inline-block; }
-.char, .word { display: inline-block; }
+.line-mask, .word-mask { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1.05; padding-bottom: 0.08em; }
+.line-mask-inner, .char, .word { display: inline-block; }
+.edu { list-style: none; padding: 0; margin: 1.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.edu li { background: #fff; color: #171717; border: 1px solid #d5d0c6; border-radius: 999px; padding: 0.55rem 0.85rem; font-weight: 600; }
 
 .stats {
 	display: grid;
@@ -360,6 +361,7 @@ h2 {
 .project-hscroll { overflow-x: auto; scroll-snap-type: x mandatory; }
 .project-row {
 	display: flex;
+	align-items: flex-start;
 	gap: 1rem;
 	width: max-content;
 	padding-bottom: 1rem;

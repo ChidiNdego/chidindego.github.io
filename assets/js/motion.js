@@ -1,39 +1,40 @@
 /*
-	Cinematic motion for the static portfolio.
-	GSAP, ScrollTrigger, and Lenis come from a CDN.
-	Reduced motion, or a missing library, leaves every fact readable.
+	Page motion.
+
+	The live site looked static for two reasons:
+	1. GSAP, ScrollTrigger, and Lenis were loaded from jsDelivr. If that CDN
+	   is blocked or slow, this file bails out and nothing animates. They are
+	   now local.
+	2. assets/js/motion.js kept the same URL as the earlier subtle version, and
+	   GitHub Pages caches it for 10 minutes. The HTML/CSS could update while
+	   the browser kept the old script. Local CSS and JS now use ?v=3.
+
+	Lenis is not started in Safari. Its smooth-wheel handling fights trackpad
+	scrolling there, so ScrollTrigger pins never advance. Chrome still gets Lenis.
+	ScrollTrigger is created only after the intro lock is released, so pins are
+	measured against the real page height.
 */
 (function () {
 	var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-	var wide = window.matchMedia("(min-width: 981px)").matches;
 	var loader = document.getElementById("loader");
 	var root = document.documentElement;
+	var safari = /Safari\//.test(navigator.userAgent) && !/Chrome\/|Chromium\/|Edg\/|OPR\//.test(navigator.userAgent);
 
-	function unlock() {
-		root.classList.remove("is-loading");
-		document.querySelectorAll("[data-held]").forEach(function (el) { el.inert = false; });
-	}
 	function dropLoader() {
-		unlock();
+		root.classList.remove("is-loading");
 		if (loader && loader.parentNode) loader.remove();
 	}
 
 	if (reduce || !window.gsap || !window.ScrollTrigger) {
-		var slot = document.querySelector("[data-rotate]");
-		if (slot) slot.textContent = "BI Engineer";
+		var fallback = document.querySelector("[data-rotate]");
+		if (fallback && !fallback.textContent.trim()) fallback.textContent = "BI Engineer";
 		dropLoader();
 		return;
 	}
 
 	var gsap = window.gsap;
 	gsap.registerPlugin(window.ScrollTrigger);
-	root.classList.add("is-loading");
-	document.querySelectorAll("body > *:not(#loader)").forEach(function (el) {
-		el.setAttribute("data-held", "");
-		el.inert = true;
-	});
-	window.setTimeout(dropLoader, 6000);
+	var started = false;
 
 	function splitChars(el) {
 		var text = el.textContent;
@@ -42,9 +43,6 @@
 		text.split(" ").forEach(function (word, wi, words) {
 			var mask = document.createElement("span");
 			mask.className = "word-mask";
-			mask.style.display = "inline-block";
-			mask.style.overflow = "hidden";
-			mask.style.verticalAlign = "bottom";
 			word.split("").forEach(function (ch) {
 				var span = document.createElement("span");
 				span.className = "char";
@@ -68,26 +66,23 @@
 		mask.appendChild(inner);
 		el.appendChild(mask);
 		gsap.from(inner, {
-			yPercent: 130,
-			duration: 1,
+			yPercent: 120,
+			duration: 0.9,
 			ease: "power4.out",
-			scrollTrigger: { trigger: el, start: "top 86%", once: true }
+			immediateRender: false,
+			scrollTrigger: { trigger: el, start: "top 88%", once: true }
 		});
 	}
 
 	document.querySelectorAll("[data-split='chars']").forEach(splitChars);
-	document.querySelectorAll("main h2").forEach(maskHeading);
 
+	root.classList.add("is-loading");
 	var pctEl = document.getElementById("loader-pct");
 	var barEl = document.getElementById("loader-bar");
 	var count = { n: 0 };
-	var countTime = wide ? 1.35 : 0.9;
-	var intro = gsap.timeline({
-		onComplete: function () {
-			dropLoader();
-			window.ScrollTrigger.refresh();
-		}
-	});
+	var countTime = window.matchMedia("(min-width: 700px)").matches ? 1.25 : 0.85;
+	var intro = gsap.timeline({ onComplete: beginScrollMotion });
+
 	intro.to(count, {
 		n: 100,
 		duration: countTime,
@@ -98,204 +93,237 @@
 			if (barEl) barEl.style.width = n + "%";
 		}
 	});
-	intro.to(loader, { yPercent: -100, duration: 0.8, ease: "power4.inOut" }, countTime);
+	intro.to(loader, { yPercent: -100, duration: 0.75, ease: "power4.inOut" }, countTime);
 
 	var chars = document.querySelectorAll(".name .char");
 	if (chars.length) {
-		gsap.set(chars, { yPercent: 130 });
-		intro.to(chars, {
-			yPercent: 0,
-			duration: 0.9,
-			stagger: 0.035,
-			ease: "power4.out"
-		}, countTime + 0.08);
+		gsap.set(chars, { yPercent: 120 });
+		intro.to(chars, { yPercent: 0, duration: 0.85, stagger: 0.03, ease: "power4.out" }, countTime + 0.05);
 	}
 	intro.from(".kicker, .lede, .cta-row .btn, .scroll-cue", {
-		y: 36,
+		y: 40,
 		autoAlpha: 0,
-		duration: 0.7,
-		stagger: 0.08,
+		duration: 0.65,
+		stagger: 0.07,
 		ease: "power3.out",
 		immediateRender: true
-	}, countTime + 0.35);
-	intro.from(".portrait-wrap", {
-		scale: 0.82,
-		autoAlpha: 0,
-		duration: 1.1,
-		ease: "power3.out",
-		immediateRender: true
-	}, countTime + 0.05);
+	}, countTime + 0.28);
+	if (document.querySelector(".portrait-wrap")) {
+		intro.from(".portrait-wrap", {
+			scale: 0.84,
+			autoAlpha: 0,
+			duration: 1,
+			ease: "power3.out",
+			immediateRender: true
+		}, countTime + 0.02);
+	}
 
 	var roleEl = document.querySelector("[data-rotate]");
 	if (roleEl) {
 		var roles = (roleEl.getAttribute("data-rotate") || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean);
-		var mask = roleEl.parentElement;
-		if (mask) mask.style.overflow = "hidden";
 		var ri = 0;
 		function cycle() {
 			var text = roles[ri % roles.length];
 			ri += 1;
-			roleEl.textContent = "";
 			var proxy = { n: 0 };
+			roleEl.textContent = "";
 			gsap.to(proxy, {
 				n: text.length,
-				duration: Math.max(0.45, text.length * 0.045),
+				duration: Math.max(0.4, text.length * 0.04),
 				ease: "none",
-				onUpdate: function () {
-					roleEl.textContent = text.slice(0, Math.round(proxy.n));
-				},
+				onUpdate: function () { roleEl.textContent = text.slice(0, Math.round(proxy.n)); },
 				onComplete: function () {
-					gsap.delayedCall(1.5, function () {
+					gsap.delayedCall(1.35, function () {
 						gsap.to(roleEl, {
-							yPercent: -40,
+							y: -18,
 							autoAlpha: 0,
-							duration: 0.28,
+							duration: 0.25,
 							onComplete: function () {
-								gsap.set(roleEl, { yPercent: 30, autoAlpha: 0 });
-								gsap.to(roleEl, { yPercent: 0, autoAlpha: 1, duration: 0.28, onComplete: cycle });
+								gsap.set(roleEl, { y: 16, autoAlpha: 0 });
+								gsap.to(roleEl, { y: 0, autoAlpha: 1, duration: 0.25, onComplete: cycle });
 							}
 						});
 					});
 				}
 			});
 		}
-		intro.call(cycle, null, countTime + 0.5);
+		intro.call(cycle, null, countTime + 0.45);
 	}
 
-	var bar = document.createElement("div");
-	bar.id = "scroll-progress";
-	bar.setAttribute("aria-hidden", "true");
-	document.body.appendChild(bar);
-	gsap.set(bar, { scaleX: 0, transformOrigin: "0 50%" });
-	gsap.to(bar, { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.2 } });
-
-	document.querySelectorAll("[data-count]").forEach(function (el) {
-		var target = Number(el.getAttribute("data-count"));
-		var prefix = el.getAttribute("data-prefix") || "";
-		var suffix = el.getAttribute("data-suffix") || "";
-		var obj = { n: 0 };
-		gsap.to(obj, {
-			n: target,
-			duration: 1.4,
-			ease: "power2.out",
-			scrollTrigger: { trigger: el, start: "top 85%", once: true },
-			onUpdate: function () {
-				el.textContent = prefix + Math.round(obj.n).toLocaleString("en-US") + suffix;
-			}
-		});
-	});
-
-	function reveal(selector, vars) {
-		gsap.utils.toArray(selector).forEach(function (el) {
+	function reveal(list, vars) {
+		gsap.utils.toArray(list).forEach(function (el) {
 			gsap.from(el, Object.assign({
-				y: 90,
+				y: 80,
 				opacity: 0,
-				scale: 0.9,
-				duration: 0.9,
+				scale: 0.92,
+				duration: 0.85,
 				ease: "power3.out",
-				scrollTrigger: { trigger: el, start: "top 88%", once: true },
+				immediateRender: false,
+				scrollTrigger: { trigger: el, start: "top 90%", once: true },
 				clearProps: "opacity,transform"
 			}, vars || {}));
 			el.addEventListener("focusin", function () {
 				gsap.killTweensOf(el);
-				gsap.set(el, { clearProps: "opacity,transform" });
+				gsap.set(el, { clearProps: "opacity,transform,scale" });
 			});
 		});
 	}
-	reveal(".role", { x: -40, y: 80 });
-	reveal(".edu li", { y: 50, scale: 0.96 });
-	reveal(".stat", { y: 60, scale: 0.92 });
 
-	if (document.querySelector(".skills")) {
-		gsap.from(".skills li", {
-			y: 28,
-			scale: 0.6,
-			opacity: 0,
-			duration: 0.5,
-			stagger: 0.035,
-			ease: "back.out(1.8)",
-			scrollTrigger: { trigger: ".skills", start: "top 82%", once: true },
-			clearProps: "opacity,transform"
-		});
+	function wireProjectWheel(scroller) {
+		scroller.addEventListener("wheel", function (event) {
+			var max = scroller.scrollWidth - scroller.clientWidth;
+			if (max <= 8) return;
+			if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
+			var next = scroller.scrollLeft + event.deltaY;
+			if ((event.deltaY > 0 && scroller.scrollLeft >= max - 1) || (event.deltaY < 0 && scroller.scrollLeft <= 0)) return;
+			scroller.scrollLeft = Math.max(0, Math.min(max, next));
+			event.preventDefault();
+		}, { passive: false });
 	}
 
-	var timeline = document.querySelector(".timeline");
-	if (timeline) {
-		var line = document.createElement("span");
-		line.className = "timeline-line";
-		line.setAttribute("aria-hidden", "true");
-		timeline.prepend(line);
-		gsap.fromTo(line, { scaleY: 0 }, {
-			scaleY: 1,
-			ease: "none",
-			scrollTrigger: { trigger: timeline, start: "top 70%", end: "bottom 60%", scrub: 0.4 }
-		});
-	}
+	function beginScrollMotion() {
+		if (started) return;
+		started = true;
+		root.classList.remove("is-loading");
+		if (loader && loader.parentNode) loader.remove();
 
-	if (wide) {
-		document.querySelectorAll(".orb").forEach(function (orb, i) {
-			gsap.to(orb, {
-				yPercent: 20 + i * 12,
-				ease: "none",
-				scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
-			});
-		});
-		var photo = document.querySelector(".portrait-wrap");
-		if (photo) {
-			gsap.to(photo, {
-				yPercent: -12,
-				ease: "none",
-				scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+		var bar = document.createElement("div");
+		bar.id = "scroll-progress";
+		bar.setAttribute("aria-hidden", "true");
+		document.body.appendChild(bar);
+		gsap.set(bar, { scaleX: 0, transformOrigin: "0 50%" });
+		gsap.to(bar, { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
+
+		document.querySelectorAll("main h2").forEach(maskHeading);
+		reveal(".role", { x: -36, y: 70 });
+		reveal(".edu li", { y: 40, scale: 0.98 });
+		reveal(".stat", { y: 50, scale: 0.94 });
+
+		var chipList = document.querySelector("#skills .skills");
+		if (chipList) {
+			gsap.from(chipList.children, {
+				y: 24,
+				scale: 0.7,
+				opacity: 0,
+				duration: 0.45,
+				stagger: 0.03,
+				ease: "back.out(1.7)",
+				immediateRender: false,
+				scrollTrigger: { trigger: chipList, start: "top 85%", once: true },
+				clearProps: "opacity,transform"
 			});
 		}
-		var scroller = document.querySelector(".project-hscroll");
-		var pin = document.querySelector(".project-pin");
-		if (scroller && pin) {
-			root.classList.add("hscroll-ready");
-			window.ScrollTrigger.create({
-				trigger: pin,
-				start: "top 70px",
-				end: function () {
-					return "+=" + Math.max(scroller.scrollWidth - scroller.clientWidth, 1);
+
+		var timeline = document.querySelector(".timeline");
+		if (timeline && !timeline.querySelector(".timeline-line")) {
+			var line = document.createElement("span");
+			line.className = "timeline-line";
+			line.setAttribute("aria-hidden", "true");
+			timeline.prepend(line);
+			gsap.fromTo(line, { scaleY: 0 }, {
+				scaleY: 1,
+				ease: "none",
+				scrollTrigger: { trigger: timeline, start: "top 75%", end: "bottom 55%", scrub: 0.35 }
+			});
+		}
+
+		document.querySelectorAll("[data-count]").forEach(function (el) {
+			var target = Number(el.getAttribute("data-count"));
+			var prefix = el.getAttribute("data-prefix") || "";
+			var suffix = el.getAttribute("data-suffix") || "";
+			var finalText = el.textContent;
+			var obj = { n: 0 };
+			el.textContent = prefix + "0" + suffix;
+			gsap.to(obj, {
+				n: target,
+				duration: 1.3,
+				ease: "power2.out",
+				scrollTrigger: { trigger: el, start: "top 88%", once: true },
+				onUpdate: function () {
+					el.textContent = prefix + Math.round(obj.n).toLocaleString("en-US") + suffix;
 				},
-				pin: true,
-				scrub: 0.55,
-				anticipatePin: 1,
-				invalidateOnRefresh: true,
-				onUpdate: function (self) {
-					var max = scroller.scrollWidth - scroller.clientWidth;
-					if (max > 0) scroller.scrollLeft = max * self.progress;
-				}
+				onComplete: function () { el.textContent = finalText; }
 			});
-		}
-		if (fine && window.Lenis) {
-			var lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
-			lenis.on("scroll", window.ScrollTrigger.update);
-			gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
-			gsap.ticker.lagSmoothing(0);
-			root.style.scrollBehavior = "auto";
-			document.querySelectorAll('a[href^="#"]').forEach(function (link) {
-				link.addEventListener("click", function (event) {
-					var id = link.getAttribute("href");
-					if (!id || id.length < 2) return;
-					var target = document.querySelector(id);
-					if (!target) return;
-					event.preventDefault();
-					lenis.scrollTo(target, { offset: -70 });
-				}, true);
+		});
+
+		var scroller = document.querySelector(".project-hscroll");
+		if (scroller) wireProjectWheel(scroller);
+
+		var mm = gsap.matchMedia();
+		mm.add("(min-width: 900px)", function () {
+			document.querySelectorAll(".orb").forEach(function (orb, i) {
+				gsap.to(orb, {
+					yPercent: 18 + i * 10,
+					ease: "none",
+					scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+				});
 			});
-		}
-		if (fine) {
-			var dot = document.createElement("div");
-			dot.id = "cursor-dot";
-			dot.setAttribute("aria-hidden", "true");
-			document.body.appendChild(dot);
-			gsap.set(dot, { xPercent: -50, yPercent: -50 });
-			window.addEventListener("pointermove", function (event) {
-				gsap.to(dot, { x: event.clientX, y: event.clientY, duration: 0.28, ease: "power3.out", overwrite: true });
-			}, { passive: true });
-		}
+			if (document.querySelector(".portrait-wrap")) {
+				gsap.to(".portrait-wrap", {
+					yPercent: -10,
+					ease: "none",
+					scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+				});
+			}
+
+			var pin = document.querySelector(".project-pin");
+			if (scroller && pin) {
+				root.classList.add("hscroll-ready");
+				window.ScrollTrigger.create({
+					trigger: pin,
+					start: "top 72px",
+					end: function () {
+						return "+=" + Math.max(scroller.scrollWidth - scroller.clientWidth, 1);
+					},
+					pin: true,
+					scrub: 0.45,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+					onUpdate: function (self) {
+						var max = scroller.scrollWidth - scroller.clientWidth;
+						if (max > 0) scroller.scrollLeft = max * self.progress;
+					}
+				});
+			}
+
+			var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+			if (!safari && fine && window.Lenis) {
+				var lenis = new window.Lenis({ autoRaf: false, duration: 1.05, smoothWheel: true, syncTouch: false });
+				lenis.on("scroll", window.ScrollTrigger.update);
+				gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+				gsap.ticker.lagSmoothing(0);
+				root.style.scrollBehavior = "auto";
+				document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+					link.addEventListener("click", function (event) {
+						var id = link.getAttribute("href");
+						if (!id || id.length < 2) return;
+						var target = document.querySelector(id);
+						if (!target) return;
+						event.preventDefault();
+						lenis.scrollTo(target, { offset: -72 });
+					}, true);
+				});
+			}
+			if (fine) {
+				var dot = document.createElement("div");
+				dot.id = "cursor-dot";
+				dot.setAttribute("aria-hidden", "true");
+				document.body.appendChild(dot);
+				gsap.set(dot, { xPercent: -50, yPercent: -50 });
+				window.addEventListener("pointermove", function (event) {
+					gsap.to(dot, { x: event.clientX, y: event.clientY, duration: 0.25, ease: "power3.out", overwrite: true });
+				}, { passive: true });
+			}
+			return function () { root.classList.remove("hscroll-ready"); };
+		});
+
+		var refresh = function () { window.ScrollTrigger.refresh(); };
+		refresh();
+		if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+		window.addEventListener("load", refresh);
 	}
 
-	window.addEventListener("load", function () { window.ScrollTrigger.refresh(); });
+	window.setTimeout(function () {
+		if (!started) beginScrollMotion();
+	}, 4000);
 })();

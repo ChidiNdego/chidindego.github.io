@@ -296,9 +296,10 @@ h2 {
 	margin: 0 0 1.2rem;
 	font-size: clamp(2.6rem, 6vw, 4.6rem);
 }
-.line-mask { display: block; overflow: hidden; }
-.line-mask-inner { display: inline-block; }
-.char, .word { display: inline-block; }
+.line-mask, .word-mask { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1.05; padding-bottom: 0.08em; }
+.line-mask-inner, .char, .word { display: inline-block; }
+.edu { list-style: none; padding: 0; margin: 1.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.edu li { background: #fff; color: #171717; border: 1px solid #d5d0c6; border-radius: 999px; padding: 0.55rem 0.85rem; font-weight: 600; }
 
 .stats {
 	display: grid;
@@ -360,10 +361,12 @@ h2 {
 .project-hscroll { overflow-x: auto; scroll-snap-type: x mandatory; }
 .project-row {
 	display: flex;
+	align-items: flex-start;
 	gap: 1rem;
 	width: max-content;
 	padding-bottom: 1rem;
 }
+.card.flagship { width: 100%; margin: 0 0 1.5rem; }
 .card {
 	width: min(78vw, 390px);
 	scroll-snap-align: start;
@@ -416,6 +419,15 @@ h2 {
 	outline: 3px solid var(--lime);
 	outline-offset: 3px;
 }
+
+html.hscroll-ready .project-pin {
+	min-height: calc(100svh - 4.5rem);
+	display: flex;
+	align-items: center;
+	background: var(--ink);
+}
+.project-hscroll::-webkit-scrollbar { height: 8px; }
+.project-hscroll::-webkit-scrollbar-thumb { background: #d6ff4a; border-radius: 99px; }
 
 @media (max-width: 860px) {
 	.nav-links { display: none; }
